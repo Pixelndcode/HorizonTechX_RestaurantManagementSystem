@@ -1,0 +1,199 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "dhyEy0PM5Qo6",
+        "outputId": "84bdacef-9dd5-4b97-cfff-ac9fe860929b"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            " * Serving Flask app '__main__'\n",
+            " * Debug mode: on\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "INFO:werkzeug:\u001b[31m\u001b[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.\u001b[0m\n",
+            " * Running on http://127.0.0.1:5000\n",
+            "INFO:werkzeug:\u001b[33mPress CTRL+C to quit\u001b[0m\n",
+            "INFO:werkzeug: * Restarting with watchdog (inotify)\n"
+          ]
+        }
+      ],
+      "source": [
+        "from flask import Flask\n",
+        "import sqlite3\n",
+        "\n",
+        "app = Flask(__name__)\n",
+        "\n",
+        "# Create Database\n",
+        "conn = sqlite3.connect(\"restaurant.db\")\n",
+        "c = conn.cursor()\n",
+        "\n",
+        "c.execute(\"\"\"\n",
+        "CREATE TABLE IF NOT EXISTS menu(\n",
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,\n",
+        "item_name TEXT,\n",
+        "price INTEGER\n",
+        ")\n",
+        "\"\"\")\n",
+        "\n",
+        "c.execute(\"\"\"\n",
+        "CREATE TABLE IF NOT EXISTS orders(\n",
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,\n",
+        "customer_name TEXT,\n",
+        "item_name TEXT\n",
+        ")\n",
+        "\"\"\")\n",
+        "\n",
+        "c.execute(\"\"\"\n",
+        "CREATE TABLE IF NOT EXISTS reservations(\n",
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,\n",
+        "customer_name TEXT,\n",
+        "table_number INTEGER\n",
+        ")\n",
+        "\"\"\")\n",
+        "\n",
+        "conn.commit()\n",
+        "conn.close()\n",
+        "\n",
+        "@app.route(\"/\")\n",
+        "def home():\n",
+        "    return \"Restaurant Management System\"\n",
+        "\n",
+        "@app.route(\"/add_menu\")\n",
+        "def add_menu():\n",
+        "    conn = sqlite3.connect(\"restaurant.db\")\n",
+        "    c = conn.cursor()\n",
+        "\n",
+        "    c.execute(\n",
+        "            \"INSERT INTO menu(item_name,price) VALUES(?,?)\",\n",
+        "                    (\"Pizza\", 250)\n",
+        "                        )\n",
+        "\n",
+        "    conn.commit()\n",
+        "    conn.close()\n",
+        "\n",
+        "    return \"Menu Item Added\"\n",
+        "\n",
+        "@app.route(\"/place_order\")\n",
+        "def place_order():\n",
+        "    conn = sqlite3.connect(\"restaurant.db\")\n",
+        "    c = conn.cursor()\n",
+        "\n",
+        "    c.execute(\n",
+        "            \"INSERT INTO orders(customer_name,item_name) VALUES(?,?)\",\n",
+        "                    (\"Deepali\", \"Pizza\")\n",
+        "                        )\n",
+        "\n",
+        "    conn.commit()\n",
+        "    conn.close()\n",
+        "\n",
+        "    return \"Order Placed\"\n",
+        "\n",
+        "@app.route(\"/reserve_table\")\n",
+        "def reserve_table():\n",
+        "    conn = sqlite3.connect(\"restaurant.db\")\n",
+        "    c = conn.cursor()\n",
+        "\n",
+        "    c.execute(\n",
+        "            \"INSERT INTO reservations(customer_name,table_number) VALUES(?,?)\",\n",
+        "                    (\"Deepali\", 5)\n",
+        "                        )\n",
+        "\n",
+        "    conn.commit()\n",
+        "    conn.close()\n",
+        "\n",
+        "    return \"Table Reserved\"\n",
+        "\n",
+        "@app.route(\"/menu\")\n",
+        "def menu():\n",
+        "    conn = sqlite3.connect(\"restaurant.db\")\n",
+        "    c = conn.cursor()\n",
+        "\n",
+        "    c.execute(\"SELECT * FROM menu\")\n",
+        "    data = c.fetchall()\n",
+        "\n",
+        "    conn.close()\n",
+        "    return str(data)\n",
+        "\n",
+        "if __name__ == \"__main__\":\n",
+        "    app.run(debug=True)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import sqlite3\n",
+        "\n",
+        "conn = sqlite3.connect(\"restaurant.db\")\n",
+        "c = conn.cursor()\n",
+        "\n",
+        "c.execute(\"INSERT INTO menu(item_name,price) VALUES(?,?)\",\n",
+        "          (\"Pizza\",250))\n",
+        "\n",
+        "c.execute(\"INSERT INTO orders(customer_name,item_name) VALUES(?,?)\",\n",
+        "                    (\"Deepali\",\"Pizza\"))\n",
+        "\n",
+        "c.execute(\"INSERT INTO reservations(customer_name,table_number) VALUES(?,?)\",\n",
+        "                              (\"Deepali\",5))\n",
+        "\n",
+        "conn.commit()\n",
+        "\n",
+        "c.execute(\"SELECT * FROM menu\")\n",
+        "print(c.fetchall())\n",
+        "\n",
+        "c.execute(\"SELECT * FROM orders\")\n",
+        "print(c.fetchall())\n",
+        "\n",
+        "c.execute(\"SELECT * FROM reservations\")\n",
+        "print(c.fetchall())\n",
+        "\n",
+        "conn.close()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "uTgK6q8s5XEE",
+        "outputId": "18dff5ee-006b-45a8-d025-b756e32a11b4"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[(1, 'Pizza', 250)]\n",
+            "[(1, 'Deepali', 'Pizza')]\n",
+            "[(1, 'Deepali', 5)]\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
